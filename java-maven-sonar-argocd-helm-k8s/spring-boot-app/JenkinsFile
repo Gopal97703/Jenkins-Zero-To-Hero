@@ -2,7 +2,7 @@ pipeline {
    agent {
     docker {
       image 'abhishekf5/maven-abhishek-docker-agent:v1'
-      args '--user root -v /var/run/docker.sock:/var/run/docker.sock' // mount Docker socket to access the host's Docker daemon
+      args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
     }
   }
   stages {
@@ -12,34 +12,38 @@ pipeline {
         //git branch: 'main', url: 'https://github.com/iam-veeramalla/Jenkins-Zero-To-Hero.git'
       }
     }
-    stage('installing java') {
+
+    stage('Build and Test (Java 11)') {
+      environment {
+        JAVA_HOME = "/usr/lib/jvm/java-11-openjdk-amd64"
+        PATH = "${JAVA_HOME}/bin:${env.PATH}"
+      }
       steps {
-        sh 'ls -ltr'
-        // build the project and create a JAR file
+        sh 'java -version'
         sh 'cd java-maven-sonar-argocd-helm-k8s/spring-boot-app && mvn clean package'
       }
     }
- stage('Build and Test') {
-      steps {
-        sh 'sudo apt update'
-        sh 'sudo apt install -y openjdk-17-jdk'
-        sh 'java -version'
-        sh 'javac -version'
-}
-    stage('Static Code Analysis') {
+
+    stage('Static Code Analysis (Java 17)') {
       environment {
         SONAR_URL = "http://32.192.246.147:9000"
+        JAVA_HOME = "/usr/lib/jvm/java-17-openjdk-amd64"
+        PATH = "${JAVA_HOME}/bin:${env.PATH}"
       }
       steps {
         withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
-          sh "cd java-maven-sonar-argocd-helm-k8s/spring-boot-app && mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=${SONAR_URL}"
+          sh '''
+            java -version
+            cd java-maven-sonar-argocd-helm-k8s/spring-boot-app
+            mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=${SONAR_URL}
+          '''
         }
       }
     }
+
     stage('Build and Push Docker Image') {
       environment {
         DOCKER_IMAGE = "abhishekf5/ultimate-cicd:${BUILD_NUMBER}"
-        // DOCKERFILE_LOCATION = "java-maven-sonar-argocd-helm-k8s/spring-boot-app/Dockerfile"
         REGISTRY_CREDENTIALS = credentials('docker-cred')
       }
       steps {
@@ -52,6 +56,7 @@ pipeline {
         }
       }
     }
+
     stage('Update Deployment File') {
         environment {
             GIT_REPO_NAME = "Jenkins-Zero-To-Hero"
