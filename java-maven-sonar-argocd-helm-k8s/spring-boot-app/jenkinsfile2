@@ -1,7 +1,7 @@
 pipeline {
   agent {
     docker {
-      image 'maven:3.9.9-eclipse-temurin-17'
+      image 'gopal703/lst'
       args '-v /var/run/docker.sock:/var/run/docker.sock --user root'
     }
   }
@@ -36,7 +36,7 @@ pipeline {
 
     stage('Build and Push Docker Image') {
       environment {
-        DOCKER_IMAGE = "abhishekf5/ultimate-cicd:${BUILD_NUMBER}"
+        DOCKER_IMAGE = "gopal703/ultimate-cicd:${BUILD_NUMBER}"
       }
       steps {
         script {
@@ -57,13 +57,13 @@ pipeline {
     stage('Update Deployment File') {
       environment {
         GIT_REPO_NAME = "Jenkins-Zero-To-Hero"
-        GIT_USER_NAME = "iam-veeramalla"
+        GIT_USER_NAME = "Gopal97703"
       }
       steps {
         withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
           sh '''
-            git config user.email "abhishek.xyz@gmail.com"
-            git config user.name "Abhishek Veeramalla"
+            git config user.email "gopal.xyz@gmail.com"
+            git config user.name "Gopal"
 
             sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" \
             java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
