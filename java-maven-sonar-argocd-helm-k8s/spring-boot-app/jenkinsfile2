@@ -62,7 +62,7 @@ pipeline {
       steps {
         withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
           sh '''
-            git config user.email "gopal.xyz@gmail.com"
+            git config user.email "gopal@gmail.com"
             git config user.name "Gopal"
 
             sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" \
