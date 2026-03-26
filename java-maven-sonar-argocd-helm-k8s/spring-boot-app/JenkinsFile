@@ -12,12 +12,6 @@ pipeline {
         //git branch: 'main', url: 'https://github.com/iam-veeramalla/Jenkins-Zero-To-Hero.git'
       }
     }
-
-    stage('Build and Test (Java 11)') {
-      environment {
-        JAVA_HOME = "/usr/lib/jvm/java-11-openjdk-amd64"
-        PATH = "${JAVA_HOME}/bin:${env.PATH}"
-      }
       steps {
         sh 'java -version'
         sh 'cd java-maven-sonar-argocd-helm-k8s/spring-boot-app && mvn clean package'
